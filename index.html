@@ -3,740 +3,418 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pace Calculator</title>
+  <title>Elijah Thompson • Portfolio</title>
   <style>
     :root {
-      --bg-gradient-start: #0f172a;
-      --bg-gradient-end: #1e1e2e;
-      --card-bg: rgba(30, 41, 59, 0.6);
-      --card-border: rgba(148, 163, 184, 0.12);
-      --card-shadow: rgba(0, 0, 0, 0.6);
+      --bg-main: #0f172a;
+      --bg-card: #1e2539;
+      --text-main: #f8fafc;
+      --text-dim: #94a3b8;
+      --accent: #6366f1;
+      --radius-lg: 1rem;
+      --radius-sm: .5rem;
+      --max-width: 1200px;
+    }
 
-      --radius-lg: 1.25rem;
-      --radius-sm: 0.75rem;
-      --radius-xl: 1rem;
-
-      --accent-start: #6366f1;
-      --accent-end: #a855f7;
-
-      --text-primary: #fff;
-      --text-dim: #a3aed0;
-      --text-secondary: #c7d2fe;
-
-      --text-error-bg: #2a0c0c;
-      --text-error-border: #ef4444;
-
-      --surface-input: rgba(15, 23, 42, 0.6);
-      --surface-input-focus: rgba(15, 23, 42, 0.9);
-      --surface-panel: rgba(2, 6, 23, 0.5);
-
-      --border-default: #475569;
-      --border-panel: rgba(71, 85, 105, 0.6);
-      --dropdown-bg: rgba(15, 23, 42, 0.95);
-      --dropdown-hover: rgba(99,102,241,0.15);
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(99,102,241,0.25) 0%, transparent 60%),
-        radial-gradient(circle at 80% 10%, rgba(168,85,247,0.18) 0%, transparent 60%),
-        radial-gradient(circle at 50% 80%, rgba(16,185,129,0.12) 0%, transparent 70%),
-        linear-gradient(160deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-      min-height: 100dvh;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.5;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 2rem;
-      color: var(--text-primary);
+      padding: 2rem 1rem 4rem;
     }
 
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px) saturate(140%);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--card-border);
-      box-shadow: 0 40px 120px var(--card-shadow);
+    .page-wrapper {
       width: 100%;
-      max-width: 500px;
-      padding: 2rem 2rem 1.5rem;
-      position: relative;
+      max-width: var(--max-width);
     }
 
-    h1 {
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 1.25rem;
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    h1 span.sub {
-      font-size: 0.8rem;
-      font-weight: 400;
-      color: var(--text-dim);
-    }
-
-    .field {
-      margin-bottom: 1rem;
-      display: flex;
-      flex-direction: column;
-    }
-
-    label {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      margin-bottom: 0.4rem;
-      font-weight: 500;
+    /* HEADER / NAV */
+    header {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
-      line-height: 1.3;
-    }
-
-    label span.hint {
-      font-size: 0.7rem;
-      color: #64748b;
-      font-weight: 400;
-    }
-
-    input,
-    button {
-      width: 100%;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-default);
-      background-color: var(--surface-input);
-      color: var(--text-primary);
-      padding: 0.8rem 0.9rem;
-      font-size: 0.95rem;
-      box-sizing: border-box;
-      outline: none;
-      transition: all 0.12s ease;
-      line-height: 1.3;
-    }
-
-    input:focus {
-      border-color: var(--accent-start);
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
-      background-color: var(--surface-input-focus);
-    }
-
-    /* hide default number spinner arrows */
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type=number] {
-      -moz-appearance: textfield;
-    }
-
-    /* CUSTOM DROPDOWN WRAPPER */
-    .custom-dropdown-wrapper {
-      position: relative;
-    }
-
-    .custom-dropdown-display {
-      width: 100%;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-default);
-      background-color: var(--surface-input);
-      color: var(--text-primary);
-      padding: 0.8rem 0.9rem;
-      font-size: 0.95rem;
-      line-height: 1.3;
-      box-sizing: border-box;
-      display: flex;
       align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.12s ease;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
     }
 
-    .custom-dropdown-display:focus,
-    .custom-dropdown-display.active {
-      border-color: var(--accent-start);
-      box-shadow: 0 0 20px rgba(99,102,241,0.5);
-      background-color: var(--surface-input-focus);
-    }
-
-    .custom-dropdown-arrow {
-      width: 1rem;
-      height: 1rem;
-      border-radius: 0.4rem;
-      background-image: linear-gradient(90deg, var(--accent-start), var(--accent-end));
-      flex-shrink: 0;
-      box-shadow: 0 6px 16px rgba(124,58,237,0.4);
-      position: relative;
-
-      /* rotation anim */
-      transition: transform 0.18s ease;
-      transform-origin: 50% 50%;
-    }
-
-    /* The white chevron mark inside the arrow block */
-    .custom-dropdown-arrow::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 6px;
-      height: 6px;
-      border-bottom: 2px solid #fff;
-      border-right: 2px solid #fff;
-      /* DEFAULT STATE = arrow points UP */
-      transform: translate(-50%, -60%) rotate(225deg);
-      /* 225deg gives you a "˄" vibe */
-    }
-
-    /* rotated = menu open = arrow spins so it points DOWN */
-    .custom-dropdown-arrow.rotated {
-      transform: rotate(180deg);
-    }
-
-    /* dropdown menu */
-    .custom-dropdown-menu {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: calc(100% + 0.4rem);
-      background-color: var(--dropdown-bg);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-xl);
-      box-shadow:
-        0 30px 80px rgba(0,0,0,0.8),
-        0 0 30px rgba(124,58,237,0.4);
-      padding: 0.4rem 0;
-      list-style: none;
-      margin: 0;
-
-      opacity: 0;
-      transform: translateY(-6px) scale(0.98);
-      pointer-events: none;
-      transition: all 0.16s ease;
-      z-index: 999;
-    }
-
-    .custom-dropdown-menu.open {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      pointer-events: auto;
-    }
-
-    .custom-dropdown-option {
-      padding: 0.6rem 0.9rem;
-      font-size: 0.9rem;
-      color: var(--text-primary);
-      line-height: 1.4;
-      cursor: pointer;
+    nav {
       display: flex;
       flex-wrap: wrap;
-      align-items: baseline;
-      justify-content: space-between;
-      border-radius: 0.5rem;
-      margin: 0 0.4rem;
-      transition: background-color 0.12s ease;
+      gap: .75rem;
     }
 
-    .custom-dropdown-option:hover {
-      background-color: var(--dropdown-hover);
-    }
-
-    .custom-dropdown-option .opt-label {
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-
-    .custom-dropdown-option .opt-hint {
+    nav a {
+      text-decoration: none;
+      font-size: .9rem;
       color: var(--text-dim);
-      font-size: 0.75rem;
-      font-weight: 400;
-      margin-left: 0.5rem;
+      padding: .5rem .75rem;
+      background: rgba(148,163,184,0.08);
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(148,163,184,0.18);
+      transition: all .15s;
+      line-height: 1.2;
     }
 
-    .custom-dropdown-option.active .opt-label {
-      color: var(--text-secondary);
+    nav a:hover {
+      color: var(--text-main);
+      background: rgba(99,102,241,.12);
+      border-color: rgba(99,102,241,.6);
     }
 
-    /* precision toggle row */
-    .checkbox-field {
+    /* REUSABLE SECTION HEADER STYLES (blue dot + description) */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      align-items: baseline;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      color: var(--text-main);
+      font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-      margin-bottom: 0.75rem;
-      user-select: none;
-      line-height: 1;
+      gap: .5rem;
+      letter-spacing: -0.03em;
     }
 
-    /*
-      Smaller precision toggle:
-      - Whole circle ~10px outer with border
-      - Inner dot ~6px when checked
-      - Border is thinner so it reads lighter next to text
-    */
-    .checkbox-field input[type="checkbox"] {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 10px;
-      height: 10px;
-      min-width: 10px;
-      min-height: 10px;
-
-      border: 1.5px solid var(--border-default);
-      border-radius: 50%;
-      cursor: pointer;
-      position: relative;
-      background-color: var(--surface-input);
-      transition: all 0.18s ease;
-      box-shadow: 0 0 0 rgba(124,58,237,0);
-      display: inline-block;
-      vertical-align: middle;
+    .section-title .dot {
+      width: .5rem;
+      height: .5rem;
+      background: var(--accent);
+      box-shadow: 0 0 20px rgba(99,102,241,.8);
+      border-radius: 999px;
+      flex-shrink: 0;
     }
 
-    /* inner dot when checked */
-    .checkbox-field input[type="checkbox"]::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      background: radial-gradient(circle at center,
-        rgba(99,102,241,0.9) 0%,
-        rgba(168,85,247,0.6) 100%);
-      transition: transform 0.18s ease;
-    }
-
-    .checkbox-field input[type="checkbox"]:checked {
-      border-color: var(--accent-start);
-      background-color: rgba(99,102,241,0.12);
-      box-shadow: 0 0 4px rgba(124,58,237,0.4);
-    }
-
-    .checkbox-field input[type="checkbox"]:checked::after {
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    .checkbox-field label {
-      font-size: 0.8rem;
+    .section-desc {
+      font-size: .85rem;
       color: var(--text-dim);
-      cursor: pointer;
-      line-height: 1.2;
-      vertical-align: middle;
-    }
-
-    button {
-      cursor: pointer;
-      font-weight: 600;
-      background-image: linear-gradient(90deg, var(--accent-start), var(--accent-end));
-      border: 0;
-      color: #fff;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-      margin-top: 0.5rem;
-      box-shadow: 0 20px 40px rgba(124,58,237,0.4);
-    }
-
-    button:hover {
-      filter: brightness(1.07);
-    }
-
-    .error {
-      background-color: var(--text-error-bg);
-      border: 1px solid var(--text-error-border);
-      color: #fff;
-      border-radius: var(--radius-sm);
-      padding: 0.75rem 1rem;
-      font-size: 0.8rem;
-      margin-bottom: 1rem;
-      display: none;
+      max-width: 60ch;
       line-height: 1.4;
     }
 
-    .results-label {
-      font-size: 0.75rem;
-      font-weight: 500;
+    /* ABOUT SECTION */
+    .about-wrapper {
+      margin-bottom: 3rem;
+    }
+
+    .about-section {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      background: radial-gradient(circle at 20% 20%, rgba(99,102,241,.18) 0%, rgba(15,23,42,0) 60%);
+      border: 1px solid rgba(148,163,184,0.12);
+      background-color: rgba(30,37,57,0.45);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 60px -10px rgba(0,0,0,.8), 0 0 80px rgba(99,102,241,.3);
+      padding: 1.25rem;
+    }
+
+    .about-photo {
+      flex: 1 1 200px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .about-photo img {
+      width: 100%;
+      max-width: 160px;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(99,102,241,.6);
+      box-shadow: 0 15px 40px rgba(0,0,0,.8), 0 0 40px rgba(99,102,241,.4);
+    }
+
+    .about-content {
+      flex: 2 1 400px;
+    }
+
+    .about-heading {
+      font-size: clamp(1.5rem, 1.5vw + 1rem, 2rem);
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.03em;
+      margin-bottom: 0.75rem;
+    }
+
+    .about-text {
+      font-size: .95rem;
       color: var(--text-dim);
-      margin-top: 1.5rem;
-      margin-bottom: 0.4rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      line-height: 1.5;
+      max-width: 55ch;
     }
 
-    .results-panel {
-      background: var(--surface-panel);
+    /* PROJECTS */
+    #projects {
+      margin-bottom: 3rem;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(320px,100%),1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .project-card {
+      background-color: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148,163,184,0.12);
+      box-shadow: 0 20px 60px -10px rgba(0,0,0,.9), 0 0 80px rgba(0,0,0,.6);
+      padding: 1.25rem 1.25rem 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .project-type {
+      font-size: .7rem;
+      font-weight: 500;
+      color: var(--accent);
+      background: rgba(99,102,241,.12);
+      padding: .35rem .5rem;
       border-radius: var(--radius-sm);
-      border: 1px solid var(--border-panel);
-      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
-      font-family: "Inter", system-ui, sans-serif;
-      font-size: 0.95rem;
-      line-height: 1.7;
-      color: #e2e8f0;
-      padding: 1rem 1.2rem;
-      height: 260px;
-      overflow-y: auto;
-
-      scrollbar-width: thin;
-      scrollbar-color: var(--accent-start) rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(99,102,241,.4);
+      display: inline-block;
+      line-height: 1.2;
+      margin-bottom: .75rem;
     }
 
-    .results-panel::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .results-panel::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.6);
-      border-radius: 999px;
-    }
-
-    .results-panel::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, var(--accent-start), var(--accent-end));
-      border-radius: 999px;
-      box-shadow: 0 0 10px rgba(168,85,247,0.6);
-    }
-
-    .results-panel::-webkit-scrollbar-thumb:hover {
-      box-shadow: 0 0 14px rgba(168,85,247,0.9);
-    }
-
-    .results-panel p {
-      margin: 0.25rem 0;
-    }
-
-    .results-panel .label {
-      color: var(--text-secondary);
+    .project-name {
+      font-size: 1.1rem;
       font-weight: 500;
+      color: var(--text-main);
+      line-height: 1.3;
+      margin-bottom: .5rem;
     }
 
-    .results-panel .placeholder {
-      color: #64748b;
-      text-align: center;
-      margin-top: 2.5rem;
-      font-style: italic;
-      font-size: 0.9rem;
+    .project-desc {
+      font-size: .9rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+      margin-bottom: 1rem;
     }
 
+    .project-links a {
+      font-size: .8rem;
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .6rem .8rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(148,163,184,0.18);
+      background: rgba(148,163,184,0.08);
+      color: var(--text-main);
+      transition: all .15s;
+    }
+
+    .project-links a:hover {
+      background: rgba(99,102,241,.12);
+      border-color: rgba(99,102,241,.6);
+    }
+
+    /* CONTACT / FOOTER */
     footer {
-      text-align: center;
-      font-size: 0.7rem;
-      color: #475569;
-      margin-top: 1rem;
-      user-select: none;
+      border-top: 1px solid rgba(148,163,184,0.12);
+      padding-top: 2rem;
+      color: var(--text-dim);
+      font-size: .8rem;
+      line-height: 1.5;
     }
 
-    footer .sig {
-      background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
-      -webkit-background-clip: text;
-      color: transparent;
+    #contact {
+      margin-bottom: 2rem;
+    }
+
+    .contact-block {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(260px,100%),1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .contact-card {
+      background-color: rgba(30,37,57,0.4);
+      border: 1px solid rgba(148,163,184,0.12);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+    }
+
+    .contact-card-title {
+      font-size: .9rem;
       font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: .5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      letter-spacing: -0.03em;
+    }
+
+    .contact-card-desc {
+      font-size: .8rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .contact-link {
+      color: var(--accent);
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .contact-link:hover {
+      text-decoration: underline;
+    }
+
+    .copyright {
+      font-size: .7rem;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .about-section {
+        flex-direction: column;
+        text-align: center;
+      }
+      .about-content {
+        text-align: center;
+      }
+      .about-heading {
+        font-size: 1.8rem;
+      }
+      .section-header {
+        flex-direction: column;
+        gap: .75rem;
+      }
+      .section-desc {
+        max-width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="card">
-    <h1>
-      Pace Calculator
-      <span class="sub">Convert race result → splits, per-mile / per-km pace</span>
-    </h1>
+  <main class="page-wrapper">
+    <!-- HEADER -->
+    <header>
+      <h2>Elijah Thompson</h2>
+      <nav>
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
 
-    <div id="errorBox" class="error" style="display:none;"></div>
+    <!-- ABOUT SECTION -->
+    <section class="about-wrapper" id="about">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="dot"></div>
+          <span>About Me</span>
+        </div>
+        <div class="section-desc">
+          Who I am, what I build, and what I care about.
+        </div>
+      </div>
 
-    <!-- Distance -->
-    <div class="field">
-      <label for="distanceInput">
-        Enter the distance you ran:
-        <span class="hint">you can use decimals</span>
-      </label>
-      <input id="distanceInput" type="number" min="0" step="any" placeholder="e.g. 5.5 or 8000" />
-    </div>
+      <div class="about-section">
+        <div class="about-photo">
+          <img src="ElijahThompsonHeadshot.jpg" alt="Elijah Thompson headshot">
+        </div>
+        <div class="about-content">
+          <div class="about-heading">Elijah Thompson</div>
+          <div class="about-text">Hi, I'm Elijah Thompson — a front-end developer and student who builds clean, responsive web experiences. I enjoy solving design challenges and translating ideas into fast, user-friendly interfaces.</div>
+        </div>
+      </div>
+    </section>
 
-    <!-- Measurement (custom dropdown) -->
-    <div class="field">
-      <label for="unitSelectDisplay">Measurement:</label>
+    <!-- PROJECTS -->
+    <section id="projects">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="dot"></div>
+          <span>Projects</span>
+        </div>
+        <div class="section-desc">
+          Real things I've built. Each project includes a short description, tech used, and a live link / code.
+        </div>
+      </div>
 
-      <div class="custom-dropdown-wrapper">
-        <div
-          id="unitSelectDisplay"
-          class="custom-dropdown-display"
-          tabindex="0"
-          role="button"
-          aria-haspopup="listbox"
-        >
-          <span id="unitSelectText">Select unit</span>
-          <div id="unitSelectArrow" class="custom-dropdown-arrow"></div>
+      <div class="projects-grid">
+        <div class="project-card">
+          <div class="project-type">Website</div>
+          <div class="project-name">Running Pace Calculator</div>
+          <div class="project-desc">A responsive pace calculator that helps runners determine splits and times across various distances.</div>
+          <div class="project-links">
+            <a href="https://runnerpacecalculator.netlify.app/" target="_blank" rel="noopener noreferrer">Live Demo ↗</a>
+            <a href="https://github.com/ElijahThompson543/RunningPaceCalc" target="_blank" rel="noopener noreferrer">Source Code 💻</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT / FOOTER -->
+    <footer id="contact">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="dot"></div>
+          <span>Contact</span>
+        </div>
+        <div class="section-desc">
+          Want to reach out? Easiest ways to get me:
+        </div>
+      </div>
+
+      <div class="contact-block">
+        <div class="contact-card">
+          <div class="contact-card-title">
+            Email
+            <span>✉</span>
+          </div>
+          <div class="contact-card-desc">
+            <a class="contact-link" href="mailto:youremail@example.com">wecancode20052025@gmail.com</a>
+          </div>
         </div>
 
-        <ul
-          id="unitDropdownMenu"
-          class="custom-dropdown-menu"
-          role="listbox"
-        >
-          <li class="custom-dropdown-option" data-value="Meters">
-            <div class="opt-label">Meters</div>
-            <div class="opt-hint">track / metric</div>
-          </li>
-          <li class="custom-dropdown-option" data-value="Miles">
-            <div class="opt-label">Miles</div>
-            <div class="opt-hint">road / XC</div>
-          </li>
-          <li class="custom-dropdown-option" data-value="Kilometers">
-            <div class="opt-label">Kilometers</div>
-            <div class="opt-hint">road / metric</div>
-          </li>
-        </ul>
+        <div class="contact-card">
+          <div class="contact-card-title">
+            GitHub
+            <span>💻</span>
+          </div>
+          <div class="contact-card-desc">
+            <a class="contact-link" href="https://github.com/elijahthompson" target="_blank" rel="noopener noreferrer">https://github.com/ElijahThompson543</a>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- Time -->
-    <div class="field">
-      <label for="timeInput">
-        Enter the time you ran:
-        <span class="hint">MM:SS or HH:MM:SS</span>
-      </label>
-      <input id="timeInput" type="text" placeholder="25:17 or 1:14:52" />
-    </div>
-
-    <!-- Precision toggle -->
-    <div class="checkbox-field">
-      <input type="checkbox" id="showHundredths" />
-      <label for="showHundredths">Show hundredths of a second (more precise)</label>
-    </div>
-
-    <button id="calcBtn">Calculate Pace</button>
-
-    <div class="results-label">Results</div>
-    <div id="resultsBox" class="results-panel">
-      <div class="placeholder">Your pace and splits will appear here...</div>
-    </div>
-
-    <footer>
-      <div>Built for distance nerds 🏃</div>
-      <div class="sig">pacecalc beta</div>
+      <div class="copyright">
+        © <span id="year"></span> Elijah Thompson. All rights reserved.
+      </div>
     </footer>
   </main>
 
   <script>
-    // Elements
-    const resultsBox = document.getElementById("resultsBox");
-    const errorBox = document.getElementById("errorBox");
-    const showHundredths = document.getElementById("showHundredths");
-
-    // Custom dropdown elements
-    const unitSelectDisplay = document.getElementById("unitSelectDisplay");
-    const unitSelectText = document.getElementById("unitSelectText");
-    const unitDropdownMenu = document.getElementById("unitDropdownMenu");
-    const unitSelectArrow = document.getElementById("unitSelectArrow");
-
-    let selectedUnit = "";
-
-    function openDropdown() {
-      unitDropdownMenu.classList.add("open");
-      unitSelectDisplay.classList.add("active");
-      // arrow should spin so it ends up pointing DOWN while open
-      unitSelectArrow.classList.add("rotated");
-    }
-
-    function closeDropdown() {
-      unitDropdownMenu.classList.remove("open");
-      unitSelectDisplay.classList.remove("active");
-      // arrow returns to default UP when closed
-      unitSelectArrow.classList.remove("rotated");
-    }
-
-    function toggleDropdown() {
-      const isOpen = unitDropdownMenu.classList.contains("open");
-      if (isOpen) {
-        closeDropdown();
-      } else {
-        openDropdown();
-      }
-    }
-
-    unitSelectDisplay.addEventListener("click", () => {
-      toggleDropdown();
-    });
-
-    unitSelectDisplay.addEventListener("keydown", (e) => {
-      if (e.key === " " || e.key === "Enter") {
-        e.preventDefault();
-        toggleDropdown();
-      }
-      if (e.key === "Escape") {
-        closeDropdown();
-      }
-    });
-
-    unitDropdownMenu.querySelectorAll(".custom-dropdown-option").forEach(opt => {
-      opt.addEventListener("click", () => {
-        const val = opt.getAttribute("data-value");
-        selectedUnit = val;
-        unitSelectText.textContent = val;
-
-        // highlight chosen option
-        unitDropdownMenu.querySelectorAll(".custom-dropdown-option").forEach(o => {
-          o.classList.toggle("active", o === opt);
-        });
-
-        closeDropdown();
-      });
-    });
-
-    // click outside closes
-    document.addEventListener("click", (e) => {
-      const clickedDisplay = unitSelectDisplay.contains(e.target);
-      const clickedMenu = unitDropdownMenu.contains(e.target);
-      if (!clickedDisplay && !clickedMenu) {
-        closeDropdown();
-      }
-    });
-
-    function showError(msg) {
-      errorBox.style.display = "block";
-      errorBox.textContent = msg;
-    }
-
-    function clearError() {
-      errorBox.style.display = "none";
-      errorBox.textContent = "";
-    }
-
-    function parseTimeToSecondsStrict(t) {
-      const parts = t.split(":");
-      if (parts.length !== 2 && parts.length !== 3) {
-        throw new Error("Time must be MM:SS or HH:MM:SS");
-      }
-
-      const nums = parts.map(p => {
-        const n = parseInt(p, 10);
-        if (isNaN(n)) {
-          throw new Error("Time must only contain numbers and ':'");
-        }
-        return n;
-      });
-
-      let [h, m, s] = [0, 0, 0];
-      if (nums.length === 2) {
-        [m, s] = nums;
-      } else {
-        [h, m, s] = nums;
-      }
-
-      if (s >= 60) {
-        throw new Error("Seconds should be < 60");
-      }
-
-      return h * 3600 + m * 60 + s;
-    }
-
-    function formatTime(sec, useHundredths) {
-      if (useHundredths) {
-        const total = sec;
-        const h = Math.floor(total / 3600);
-        const m = Math.floor((total % 3600) / 60);
-        const s = (total % 60).toFixed(2).padStart(5, "0");
-        return h > 0
-          ? `${h}:${String(m).padStart(2,"0")}:${s}`
-          : `${m}:${s}`;
-      } else {
-        const total = Math.round(sec);
-        const h = Math.floor(total / 3600);
-        const m = Math.floor((total % 3600) / 60);
-        const s = total % 60;
-        return h > 0
-          ? `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
-          : `${m}:${String(s).padStart(2,"0")}`;
-      }
-    }
-
-    function calculate() {
-      clearError();
-      resultsBox.innerHTML = "";
-
-      const distStr = document.getElementById("distanceInput").value.trim();
-      const timeStr = document.getElementById("timeInput").value.trim();
-      const unit = selectedUnit;
-
-      if (!distStr) {
-        return showError("Please enter a distance.");
-      }
-
-      const distanceVal = parseFloat(distStr);
-      if (isNaN(distanceVal) || distanceVal <= 0) {
-        return showError("Distance must be a positive number.");
-      }
-
-      if (!unit) {
-        return showError("Please select a measurement.");
-      }
-
-      let totalSeconds;
-      try {
-        totalSeconds = parseTimeToSecondsStrict(timeStr);
-      } catch (err) {
-        return showError("Time error: " + err.message);
-      }
-
-      const useHundredths = showHundredths.checked;
-
-      // convert distance to both miles and km
-      let distanceMiles, distanceKm, unitName;
-      if (unit === "Meters") {
-        distanceMiles = distanceVal / 1609.34;
-        distanceKm = distanceVal / 1000.0;
-        unitName = "meters";
-      } else if (unit === "Miles") {
-        distanceMiles = distanceVal;
-        distanceKm = distanceVal * 1.60934;
-        unitName = "miles";
-      } else {
-        distanceKm = distanceVal;
-        distanceMiles = distanceVal / 1.60934;
-        unitName = "kilometers";
-      }
-
-      const pacePerMile = totalSeconds / distanceMiles;
-      const pacePerKm = totalSeconds / distanceKm;
-
-      let html = `
-        <p><span class="label">Distance:</span> ${distanceVal} ${unitName}</p>
-        <p><span class="label">Time:</span> ${formatTime(totalSeconds, useHundredths)}</p>
-        <p><span class="label">Pace per mile:</span> ${formatTime(pacePerMile, useHundredths)} min/mi</p>
-        <p><span class="label">Pace per km:</span> ${formatTime(pacePerKm, useHundredths)} min/km</p>
-        <br>
-        <p class="label">Equivalent Splits</p>
-      `;
-
-      const standardDistances = {
-        "100m": 100 / 1609.34,
-        "200m": 200 / 1609.34,
-        "400m": 400 / 1609.34,
-        "800m": 800 / 1609.34,
-        "1600m": 1600 / 1609.34,
-        "3200m": 3200 / 1609.34,
-        "5k": 5000 / 1609.34,
-        "6k": 6000 / 1609.34,
-        "8k": 8000 / 1609.34,
-        "10k": 10000 / 1609.34,
-        "Half Marathon": 13.1094,
-        "Marathon": 26.2188
-      };
-
-      for (const label in standardDistances) {
-        const splitTime = formatTime(
-          (totalSeconds / distanceMiles) * standardDistances[label],
-          useHundredths
-        );
-        html += `<p><span class="label">${label}:</span> ${splitTime}</p>`;
-      }
-
-      resultsBox.innerHTML = html;
-    }
-
-    document.getElementById("calcBtn").addEventListener("click", calculate);
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
