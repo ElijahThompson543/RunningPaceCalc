@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pace Calculator</title>
+  <title>Pace Calculator + Track Splits</title>
   <style>
     :root {
       --bg-gradient-start: #0f172a;
@@ -14,7 +14,6 @@
 
       --radius-lg: 1.25rem;
       --radius-sm: 0.75rem;
-      --radius-xl: 1rem;
 
       --accent-start: #6366f1;
       --accent-end: #a855f7;
@@ -32,8 +31,6 @@
 
       --border-default: #475569;
       --border-panel: rgba(71, 85, 105, 0.6);
-      --dropdown-bg: rgba(15, 23, 42, 0.95);
-      --dropdown-hover: rgba(99,102,241,0.15);
     }
 
     body {
@@ -51,6 +48,11 @@
       color: var(--text-primary);
     }
 
+    /* keep inputs contained */
+    *, *::before, *::after { box-sizing: border-box; }
+    .panel { overflow: hidden; }
+    input, select, button { max-width: 100%; display: block; }
+
     .card {
       background: var(--card-bg);
       backdrop-filter: blur(16px) saturate(140%);
@@ -58,685 +60,288 @@
       border: 1px solid var(--card-border);
       box-shadow: 0 40px 120px var(--card-shadow);
       width: 100%;
-      max-width: 500px;
-      padding: 2rem 2rem 1.5rem;
+      max-width: 860px;
+      padding: 1.25rem 1.25rem 1rem;
       position: relative;
     }
 
-    h1 {
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 1.25rem;
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
+    h1 { text-align: center; margin: 0.25rem 0 0.5rem; font-size: 1.25rem; font-weight: 700; }
+    h1 span.sub { display:block; font-size: .8rem; color: var(--text-dim); font-weight: 400; }
 
-    h1 span.sub {
-      font-size: 0.8rem;
-      font-weight: 400;
-      color: var(--text-dim);
-    }
+    .tabs { display:flex; gap:.5rem; justify-content:center; margin:.75rem 0 1rem; flex-wrap:wrap; }
+    .tab-btn { border:1px solid var(--border-default); background:var(--surface-input); color:#fff; padding:.55rem .9rem; border-radius:999px; cursor:pointer; font-weight:600; }
+    .tab-btn.active { background-image: linear-gradient(90deg, var(--accent-start), var(--accent-end)); border-color: transparent; box-shadow: 0 8px 24px rgba(124,58,237,0.35); }
 
-    .field {
-      margin-bottom: 1rem;
-      display: flex;
-      flex-direction: column;
-    }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 800px){ .grid{ grid-template-columns: 1fr; } }
 
-    label {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      margin-bottom: 0.4rem;
-      font-weight: 500;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      line-height: 1.3;
-    }
+    .panel { background: var(--surface-panel); border-radius: var(--radius-sm); border:1px solid var(--border-panel); padding:1rem; }
 
-    label span.hint {
-      font-size: 0.7rem;
-      color: #64748b;
-      font-weight: 400;
-    }
+    .field { margin-bottom: .9rem; display:flex; flex-direction: column; }
+    label { font-size: .8rem; color: var(--text-dim); margin-bottom:.35rem; font-weight:500; }
+    input, select, button { width:100%; border-radius: var(--radius-sm); border:1px solid var(--border-default); background: var(--surface-input); color:#fff; padding:.75rem .9rem; font-size:.95rem; line-height:1.3; }
+    input:focus, select:focus { border-color: var(--accent-start); box-shadow: 0 0 20px rgba(99,102,241,0.5); background: var(--surface-input-focus); outline: none; }
+    button { cursor:pointer; font-weight:700; background-image: linear-gradient(90deg, var(--accent-start), var(--accent-end)); border:0; color:#fff; box-shadow:0 20px 40px rgba(124,58,237,0.4); margin-top:.5rem; }
 
-    input,
-    button {
-      width: 100%;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-default);
-      background-color: var(--surface-input);
-      color: var(--text-primary);
-      padding: 0.8rem 0.9rem;
-      font-size: 0.95rem;
-      box-sizing: border-box;
-      outline: none;
-      transition: all 0.12s ease;
-      line-height: 1.3;
-    }
+    .error { background: var(--text-error-bg); border:1px solid var(--text-error-border); color:#fff; border-radius: var(--radius-sm); padding:.75rem 1rem; font-size:.8rem; margin-bottom:1rem; display:none; }
 
-    input:focus {
-      border-color: var(--accent-start);
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
-      background-color: var(--surface-input-focus);
-    }
+    .results-label { font-size:.75rem; color: var(--text-dim); text-transform:uppercase; letter-spacing:.05em; margin:.75rem 0 .35rem; }
+    .results-panel { background: var(--surface-panel); border:1px solid var(--border-panel); border-radius: var(--radius-sm); box-shadow: inset 0 0 20px rgba(0,0,0,.6); font-size:.95rem; color:#e2e8f0; padding:1rem 1.2rem; height:260px; overflow:auto; }
+    .results-panel p { margin:.25rem 0; }
+    .results-panel .label { color: var(--text-secondary); font-weight:500; }
 
-    /* hide default number spinner arrows */
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type=number] {
-      -moz-appearance: textfield;
-    }
+    .hidden{ display:none; }
 
-    /* CUSTOM DROPDOWN WRAPPER */
-    .custom-dropdown-wrapper {
-      position: relative;
-    }
-
-    .custom-dropdown-display {
-      width: 100%;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-default);
-      background-color: var(--surface-input);
-      color: var(--text-primary);
-      padding: 0.8rem 0.9rem;
-      font-size: 0.95rem;
-      line-height: 1.3;
-      box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.12s ease;
-    }
-
-    .custom-dropdown-display:focus,
-    .custom-dropdown-display.active {
-      border-color: var(--accent-start);
-      box-shadow: 0 0 20px rgba(99,102,241,0.5);
-      background-color: var(--surface-input-focus);
-    }
-
-    .custom-dropdown-arrow {
-      width: 1rem;
-      height: 1rem;
-      border-radius: 0.4rem;
-      background-image: linear-gradient(90deg, var(--accent-start), var(--accent-end));
-      flex-shrink: 0;
-      box-shadow: 0 6px 16px rgba(124,58,237,0.4);
-      position: relative;
-
-      /* rotation anim */
-      transition: transform 0.18s ease;
-      transform-origin: 50% 50%;
-    }
-
-    /* The white chevron mark inside the arrow block */
-    .custom-dropdown-arrow::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 6px;
-      height: 6px;
-      border-bottom: 2px solid #fff;
-      border-right: 2px solid #fff;
-      /* DEFAULT STATE = arrow points UP */
-      transform: translate(-50%, -60%) rotate(225deg);
-      /* 225deg gives you a "˄" vibe */
-    }
-
-    /* rotated = menu open = arrow spins so it points DOWN */
-    .custom-dropdown-arrow.rotated {
-      transform: rotate(180deg);
-    }
-
-    /* dropdown menu */
-    .custom-dropdown-menu {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: calc(100% + 0.4rem);
-      background-color: var(--dropdown-bg);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-xl);
-      box-shadow:
-        0 30px 80px rgba(0,0,0,0.8),
-        0 0 30px rgba(124,58,237,0.4);
-      padding: 0.4rem 0;
-      list-style: none;
-      margin: 0;
-
-      opacity: 0;
-      transform: translateY(-6px) scale(0.98);
-      pointer-events: none;
-      transition: all 0.16s ease;
-      z-index: 999;
-    }
-
-    .custom-dropdown-menu.open {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      pointer-events: auto;
-    }
-
-    .custom-dropdown-option {
-      padding: 0.6rem 0.9rem;
-      font-size: 0.9rem;
-      color: var(--text-primary);
-      line-height: 1.4;
-      cursor: pointer;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      justify-content: space-between;
-      border-radius: 0.5rem;
-      margin: 0 0.4rem;
-      transition: background-color 0.12s ease;
-    }
-
-    .custom-dropdown-option:hover {
-      background-color: var(--dropdown-hover);
-    }
-
-    .custom-dropdown-option .opt-label {
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-
-    .custom-dropdown-option .opt-hint {
-      color: var(--text-dim);
-      font-size: 0.75rem;
-      font-weight: 400;
-      margin-left: 0.5rem;
-    }
-
-    .custom-dropdown-option.active .opt-label {
-      color: var(--text-secondary);
-    }
-
-    /* precision toggle row */
-    .checkbox-field {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-      margin-bottom: 0.75rem;
-      user-select: none;
-      line-height: 1;
-    }
-
-    /*
-      Smaller precision toggle:
-      - Whole circle ~10px outer with border
-      - Inner dot ~6px when checked
-      - Border is thinner so it reads lighter next to text
-    */
-    .checkbox-field input[type="checkbox"] {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 10px;
-      height: 10px;
-      min-width: 10px;
-      min-height: 10px;
-
-      border: 1.5px solid var(--border-default);
-      border-radius: 50%;
-      cursor: pointer;
-      position: relative;
-      background-color: var(--surface-input);
-      transition: all 0.18s ease;
-      box-shadow: 0 0 0 rgba(124,58,237,0);
-      display: inline-block;
-      vertical-align: middle;
-    }
-
-    /* inner dot when checked */
-    .checkbox-field input[type="checkbox"]::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      background: radial-gradient(circle at center,
-        rgba(99,102,241,0.9) 0%,
-        rgba(168,85,247,0.6) 100%);
-      transition: transform 0.18s ease;
-    }
-
-    .checkbox-field input[type="checkbox"]:checked {
-      border-color: var(--accent-start);
-      background-color: rgba(99,102,241,0.12);
-      box-shadow: 0 0 4px rgba(124,58,237,0.4);
-    }
-
-    .checkbox-field input[type="checkbox"]:checked::after {
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    .checkbox-field label {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      cursor: pointer;
-      line-height: 1.2;
-      vertical-align: middle;
-    }
-
-    button {
-      cursor: pointer;
-      font-weight: 600;
-      background-image: linear-gradient(90deg, var(--accent-start), var(--accent-end));
-      border: 0;
-      color: #fff;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-      margin-top: 0.5rem;
-      box-shadow: 0 20px 40px rgba(124,58,237,0.4);
-    }
-
-    button:hover {
-      filter: brightness(1.07);
-    }
-
-    .error {
-      background-color: var(--text-error-bg);
-      border: 1px solid var(--text-error-border);
-      color: #fff;
-      border-radius: var(--radius-sm);
-      padding: 0.75rem 1rem;
-      font-size: 0.8rem;
-      margin-bottom: 1rem;
-      display: none;
-      line-height: 1.4;
-    }
-
-    .results-label {
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: var(--text-dim);
-      margin-top: 1.5rem;
-      margin-bottom: 0.4rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .results-panel {
-      background: var(--surface-panel);
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-panel);
-      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
-      font-family: "Inter", system-ui, sans-serif;
-      font-size: 0.95rem;
-      line-height: 1.7;
-      color: #e2e8f0;
-      padding: 1rem 1.2rem;
-      height: 260px;
-      overflow-y: auto;
-
-      scrollbar-width: thin;
-      scrollbar-color: var(--accent-start) rgba(15, 23, 42, 0.6);
-    }
-
-    .results-panel::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .results-panel::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.6);
-      border-radius: 999px;
-    }
-
-    .results-panel::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, var(--accent-start), var(--accent-end));
-      border-radius: 999px;
-      box-shadow: 0 0 10px rgba(168,85,247,0.6);
-    }
-
-    .results-panel::-webkit-scrollbar-thumb:hover {
-      box-shadow: 0 0 14px rgba(168,85,247,0.9);
-    }
-
-    .results-panel p {
-      margin: 0.25rem 0;
-    }
-
-    .results-panel .label {
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-
-    .results-panel .placeholder {
-      color: #64748b;
-      text-align: center;
-      margin-top: 2.5rem;
-      font-style: italic;
-      font-size: 0.9rem;
-    }
-
-    footer {
-      text-align: center;
-      font-size: 0.7rem;
-      color: #475569;
-      margin-top: 1rem;
-      user-select: none;
-    }
-
-    footer .sig {
-      background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
-      -webkit-background-clip: text;
-      color: transparent;
-      font-weight: 500;
-    }
+    .track-wrap{ display:flex; align-items:center; justify-content:center; background: rgba(15,23,42,0.45); border:1px solid var(--border-panel); border-radius: var(--radius-sm); padding:.5rem; }
+    svg { width:100%; height:260px; }
   </style>
 </head>
 <body>
   <main class="card">
-    <h1>
-      Pace Calculator
-      <span class="sub">Convert race result → splits, per-mile / per-km pace</span>
-    </h1>
+    <h1>Pace Toolkit <span class="sub">Pace calculator • Track splits visualizer</span></h1>
 
-    <div id="errorBox" class="error" style="display:none;"></div>
-
-    <!-- Distance -->
-    <div class="field">
-      <label for="distanceInput">
-        Enter the distance you ran:
-        <span class="hint">you can use decimals</span>
-      </label>
-      <input id="distanceInput" type="number" min="0" step="any" placeholder="e.g. 5.5 or 8000" />
+    <div class="tabs">
+      <button id="tabBtnPace" class="tab-btn active" aria-controls="tab-pace">Pace Calculator</button>
+      <button id="tabBtnSplits" class="tab-btn" aria-controls="tab-splits">Track Splits</button>
     </div>
 
-    <!-- Measurement (custom dropdown) -->
-    <div class="field">
-      <label for="unitSelectDisplay">Measurement:</label>
-
-      <div class="custom-dropdown-wrapper">
-        <div
-          id="unitSelectDisplay"
-          class="custom-dropdown-display"
-          tabindex="0"
-          role="button"
-          aria-haspopup="listbox"
-        >
-          <span id="unitSelectText">Select unit</span>
-          <div id="unitSelectArrow" class="custom-dropdown-arrow"></div>
+    <!-- Pace Calculator TAB -->
+    <section id="tab-pace">
+      <div id="errorBox" class="error"></div>
+      <div class="grid">
+        <div class="panel">
+          <div class="field">
+            <label for="distanceInput">Enter the distance you ran</label>
+            <input id="distanceInput" type="number" min="0" step="any" placeholder="e.g. 5.5 or 8000" />
+          </div>
+          <div class="field">
+            <label for="unitSelect">Measurement</label>
+            <select id="unitSelect">
+              <option value="">Select unit</option>
+              <option>Meters</option>
+              <option>Miles</option>
+              <option>Kilometers</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="timeInput">Enter the time you ran <span class="hint">MM:SS or HH:MM:SS</span></label>
+            <input id="timeInput" type="text" placeholder="25:17 or 1:14:52" />
+          </div>
+          <div class="field" style="display:flex;align-items:center;gap:.5rem;">
+            <input type="checkbox" id="showHundredths" />
+            <label for="showHundredths" style="margin:0;">Show hundredths of a second</label>
+          </div>
+          <button id="calcBtn">Calculate Pace</button>
         </div>
-
-        <ul
-          id="unitDropdownMenu"
-          class="custom-dropdown-menu"
-          role="listbox"
-        >
-          <li class="custom-dropdown-option" data-value="Meters">
-            <div class="opt-label">Meters</div>
-            <div class="opt-hint">track / metric</div>
-          </li>
-          <li class="custom-dropdown-option" data-value="Miles">
-            <div class="opt-label">Miles</div>
-            <div class="opt-hint">road / XC</div>
-          </li>
-          <li class="custom-dropdown-option" data-value="Kilometers">
-            <div class="opt-label">Kilometers</div>
-            <div class="opt-hint">road / metric</div>
-          </li>
-        </ul>
+        <div class="panel">
+          <div class="results-label">Results</div>
+          <div id="resultsBox" class="results-panel"><p class="hint">Your pace and splits will appear here…</p></div>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Time -->
-    <div class="field">
-      <label for="timeInput">
-        Enter the time you ran:
-        <span class="hint">MM:SS or HH:MM:SS</span>
-      </label>
-      <input id="timeInput" type="text" placeholder="25:17 or 1:14:52" />
-    </div>
-
-    <!-- Precision toggle -->
-    <div class="checkbox-field">
-      <input type="checkbox" id="showHundredths" />
-      <label for="showHundredths">Show hundredths of a second (more precise)</label>
-    </div>
-
-    <button id="calcBtn">Calculate Pace</button>
-
-    <div class="results-label">Results</div>
-    <div id="resultsBox" class="results-panel">
-      <div class="placeholder">Your pace and splits will appear here...</div>
-    </div>
-
-    <footer>
-      <div>Built for distance nerds 🏃</div>
-      <div class="sig">pacecalc beta</div>
-    </footer>
+    <!-- Track Splits TAB -->
+    <section id="tab-splits" class="hidden">
+      <div id="errorBoxSplits" class="error"></div>
+      <div class="grid">
+        <div class="panel">
+          <div class="field">
+            <label for="raceDistanceValue">Race distance</label>
+            <input id="raceDistanceValue" type="number" min="0" step="any" placeholder="e.g. 1, 1600, 5" />
+          </div>
+          <div class="field">
+            <label for="raceDistanceUnit">Unit</label>
+            <select id="raceDistanceUnit">
+              <option value="meters">Meters</option>
+              <option value="kilometers">Kilometers</option>
+              <option value="miles" selected>Miles</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="targetTime">Target time <span class="hint">MM:SS or HH:MM:SS</span></label>
+            <input id="targetTime" type="text" placeholder="4:20 or 1:59:30" />
+          </div>
+          <div class="field">
+            <label for="trackLength">Track length (meters)</label>
+            <input id="trackLength" type="number" min="10" step="any" placeholder="e.g. 300" />
+          </div>
+          <button id="calcSplitsBtn">Calculate race splits</button>
+        </div>
+        <div class="panel">
+          <div class="results-label">Track & Splits</div>
+          <div class="track-wrap">
+            <svg id="trackSvg" viewBox="0 0 600 300" aria-label="Track diagram">
+              <!-- Outer/inner lane borders -->
+              <rect x="50" y="25" rx="100" ry="100" width="500" height="250" fill="#0b1224" stroke="#334155" stroke-width="6" />
+              <rect x="70" y="45" rx="80" ry="80" width="460" height="210" fill="#111827" stroke="#1f2937" stroke-width="2" />
+              <!-- Finish line (fixed at bottom-right, short segment on lane centerline) -->
+              <line id="finishLine" x1="0" y1="0" x2="0" y2="0" stroke="#ffffff" stroke-width="2" stroke-dasharray="6,4" />
+              <!-- Start dot (lane centerline) -->
+              <circle id="startDot" cx="300" cy="150" r="6" fill="#facc15" stroke="#a16207" stroke-width="2" />
+              <g id="svgLabels" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#cbd5e1">
+                <text id="lapInfo" x="20" y="290">—</text>
+              </g>
+            </svg>
+          </div>
+          <div id="splitsBox" class="results-panel" style="margin-top:.6rem; height:200px;"></div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script>
-    // Elements
+    // ===== Utilities =====
+    function show(el){ el.classList.remove('hidden'); }
+    function hide(el){ el.classList.add('hidden'); }
+    function showError(el, msg){ el.style.display='block'; el.textContent = msg; }
+    function clearError(el){ el.style.display='none'; el.textContent=''; }
+
+    function parseTimeToSecondsStrict(t){
+      const parts = t.split(":");
+      if (parts.length !== 2 && parts.length !== 3) throw new Error("Time must be MM:SS or HH:MM:SS");
+      const nums = parts.map(p=>{ const n = parseInt(p,10); if (isNaN(n)) throw new Error("Time must only contain numbers and ':'"); return n; });
+      let [h,m,s] = [0,0,0];
+      if (nums.length===2){ [m,s]=nums; } else { [h,m,s]=nums; }
+      if (s>=60) throw new Error("Seconds should be < 60");
+      return h*3600 + m*60 + s;
+    }
+    function fmt(sec, hundredths=false){
+      if (hundredths){
+        const total = sec; const h=Math.floor(total/3600); const m=Math.floor((total%3600)/60); const s=(total%60).toFixed(2).padStart(5,'0');
+        return h>0? `${h}:${String(m).padStart(2,'0')}:${s}` : `${m}:${s}`;
+      } else {
+        const total = Math.round(sec); const h=Math.floor(total/3600); const m=Math.floor((total%3600)/60); const s=total%60;
+        return h>0? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
+      }
+    }
+
+    // ===== Tabs =====
+    const tabBtnPace = document.getElementById('tabBtnPace');
+    const tabBtnSplits = document.getElementById('tabBtnSplits');
+    const tabPace = document.getElementById('tab-pace');
+    const tabSplits = document.getElementById('tab-splits');
+
+    function activate(tab){
+      if (tab==='pace'){ tabBtnPace.classList.add('active'); tabBtnSplits.classList.remove('active'); show(tabPace); hide(tabSplits); }
+      else { tabBtnSplits.classList.add('active'); tabBtnPace.classList.remove('active'); show(tabSplits); hide(tabPace); }
+    }
+    tabBtnPace.addEventListener('click', ()=>activate('pace'));
+    tabBtnSplits.addEventListener('click', ()=>activate('splits'));
+
+    // ===== Pace Calculator =====
     const resultsBox = document.getElementById("resultsBox");
     const errorBox = document.getElementById("errorBox");
     const showHundredths = document.getElementById("showHundredths");
+    const unitSelect = document.getElementById('unitSelect');
 
-    // Custom dropdown elements
-    const unitSelectDisplay = document.getElementById("unitSelectDisplay");
-    const unitSelectText = document.getElementById("unitSelectText");
-    const unitDropdownMenu = document.getElementById("unitDropdownMenu");
-    const unitSelectArrow = document.getElementById("unitSelectArrow");
-
-    let selectedUnit = "";
-
-    function openDropdown() {
-      unitDropdownMenu.classList.add("open");
-      unitSelectDisplay.classList.add("active");
-      // arrow should spin so it ends up pointing DOWN while open
-      unitSelectArrow.classList.add("rotated");
-    }
-
-    function closeDropdown() {
-      unitDropdownMenu.classList.remove("open");
-      unitSelectDisplay.classList.remove("active");
-      // arrow returns to default UP when closed
-      unitSelectArrow.classList.remove("rotated");
-    }
-
-    function toggleDropdown() {
-      const isOpen = unitDropdownMenu.classList.contains("open");
-      if (isOpen) {
-        closeDropdown();
-      } else {
-        openDropdown();
-      }
-    }
-
-    unitSelectDisplay.addEventListener("click", () => {
-      toggleDropdown();
-    });
-
-    unitSelectDisplay.addEventListener("keydown", (e) => {
-      if (e.key === " " || e.key === "Enter") {
-        e.preventDefault();
-        toggleDropdown();
-      }
-      if (e.key === "Escape") {
-        closeDropdown();
-      }
-    });
-
-    unitDropdownMenu.querySelectorAll(".custom-dropdown-option").forEach(opt => {
-      opt.addEventListener("click", () => {
-        const val = opt.getAttribute("data-value");
-        selectedUnit = val;
-        unitSelectText.textContent = val;
-
-        // highlight chosen option
-        unitDropdownMenu.querySelectorAll(".custom-dropdown-option").forEach(o => {
-          o.classList.toggle("active", o === opt);
-        });
-
-        closeDropdown();
-      });
-    });
-
-    // click outside closes
-    document.addEventListener("click", (e) => {
-      const clickedDisplay = unitSelectDisplay.contains(e.target);
-      const clickedMenu = unitDropdownMenu.contains(e.target);
-      if (!clickedDisplay && !clickedMenu) {
-        closeDropdown();
-      }
-    });
-
-    function showError(msg) {
-      errorBox.style.display = "block";
-      errorBox.textContent = msg;
-    }
-
-    function clearError() {
-      errorBox.style.display = "none";
-      errorBox.textContent = "";
-    }
-
-    function parseTimeToSecondsStrict(t) {
-      const parts = t.split(":");
-      if (parts.length !== 2 && parts.length !== 3) {
-        throw new Error("Time must be MM:SS or HH:MM:SS");
-      }
-
-      const nums = parts.map(p => {
-        const n = parseInt(p, 10);
-        if (isNaN(n)) {
-          throw new Error("Time must only contain numbers and ':'");
-        }
-        return n;
-      });
-
-      let [h, m, s] = [0, 0, 0];
-      if (nums.length === 2) {
-        [m, s] = nums;
-      } else {
-        [h, m, s] = nums;
-      }
-
-      if (s >= 60) {
-        throw new Error("Seconds should be < 60");
-      }
-
-      return h * 3600 + m * 60 + s;
-    }
-
-    function formatTime(sec, useHundredths) {
-      if (useHundredths) {
-        const total = sec;
-        const h = Math.floor(total / 3600);
-        const m = Math.floor((total % 3600) / 60);
-        const s = (total % 60).toFixed(2).padStart(5, "0");
-        return h > 0
-          ? `${h}:${String(m).padStart(2,"0")}:${s}`
-          : `${m}:${s}`;
-      } else {
-        const total = Math.round(sec);
-        const h = Math.floor(total / 3600);
-        const m = Math.floor((total % 3600) / 60);
-        const s = total % 60;
-        return h > 0
-          ? `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
-          : `${m}:${String(s).padStart(2,"0")}`;
-      }
-    }
-
-    function calculate() {
-      clearError();
-      resultsBox.innerHTML = "";
-
+    function calculate(){
+      clearError(errorBox); resultsBox.innerHTML = "";
       const distStr = document.getElementById("distanceInput").value.trim();
       const timeStr = document.getElementById("timeInput").value.trim();
-      const unit = selectedUnit;
+      const unit = unitSelect.value;
+      if (!distStr) return showError(errorBox, "Please enter a distance.");
+      const distanceVal = parseFloat(distStr); if (isNaN(distanceVal) || distanceVal <= 0) return showError(errorBox, "Distance must be a positive number.");
+      if (!unit) return showError(errorBox, "Please select a measurement.");
+      let totalSeconds; try { totalSeconds = parseTimeToSecondsStrict(timeStr); } catch(err){ return showError(errorBox, "Time error: "+err.message); }
+      const useHundredths = showHundredths && showHundredths.checked;
 
-      if (!distStr) {
-        return showError("Please enter a distance.");
-      }
-
-      const distanceVal = parseFloat(distStr);
-      if (isNaN(distanceVal) || distanceVal <= 0) {
-        return showError("Distance must be a positive number.");
-      }
-
-      if (!unit) {
-        return showError("Please select a measurement.");
-      }
-
-      let totalSeconds;
-      try {
-        totalSeconds = parseTimeToSecondsStrict(timeStr);
-      } catch (err) {
-        return showError("Time error: " + err.message);
-      }
-
-      const useHundredths = showHundredths.checked;
-
-      // convert distance to both miles and km
       let distanceMiles, distanceKm, unitName;
-      if (unit === "Meters") {
-        distanceMiles = distanceVal / 1609.34;
-        distanceKm = distanceVal / 1000.0;
-        unitName = "meters";
-      } else if (unit === "Miles") {
-        distanceMiles = distanceVal;
-        distanceKm = distanceVal * 1.60934;
-        unitName = "miles";
-      } else {
-        distanceKm = distanceVal;
-        distanceMiles = distanceVal / 1.60934;
-        unitName = "kilometers";
-      }
+      if (unit === "Meters"){ distanceMiles = distanceVal / 1609.34; distanceKm = distanceVal / 1000.0; unitName = "meters"; }
+      else if (unit === "Miles"){ distanceMiles = distanceVal; distanceKm = distanceVal * 1.60934; unitName = "miles"; }
+      else { distanceKm = distanceVal; distanceMiles = distanceVal / 1.60934; unitName = "kilometers"; }
 
-      const pacePerMile = totalSeconds / distanceMiles;
-      const pacePerKm = totalSeconds / distanceKm;
-
+      const pacePerMile = totalSeconds / distanceMiles; const pacePerKm = totalSeconds / distanceKm;
       let html = `
         <p><span class="label">Distance:</span> ${distanceVal} ${unitName}</p>
-        <p><span class="label">Time:</span> ${formatTime(totalSeconds, useHundredths)}</p>
-        <p><span class="label">Pace per mile:</span> ${formatTime(pacePerMile, useHundredths)} min/mi</p>
-        <p><span class="label">Pace per km:</span> ${formatTime(pacePerKm, useHundredths)} min/km</p>
-        <br>
-        <p class="label">Equivalent Splits</p>
-      `;
+        <p><span class="label">Time:</span> ${fmt(totalSeconds, useHundredths)}</p>
+        <p><span class="label">Pace per mile:</span> ${fmt(pacePerMile, useHundredths)} min/mi</p>
+        <p><span class="label">Pace per km:</span> ${fmt(pacePerKm, useHundredths)} min/km</p>
+        <br><p class="label">Equivalent Splits</p>`;
 
-      const standardDistances = {
-        "100m": 100 / 1609.34,
-        "200m": 200 / 1609.34,
-        "400m": 400 / 1609.34,
-        "800m": 800 / 1609.34,
-        "1600m": 1600 / 1609.34,
-        "3200m": 3200 / 1609.34,
-        "5k": 5000 / 1609.34,
-        "6k": 6000 / 1609.34,
-        "8k": 8000 / 1609.34,
-        "10k": 10000 / 1609.34,
-        "Half Marathon": 13.1094,
-        "Marathon": 26.2188
-      };
-
-      for (const label in standardDistances) {
-        const splitTime = formatTime(
-          (totalSeconds / distanceMiles) * standardDistances[label],
-          useHundredths
-        );
+      const standardDistances = {"100m":100/1609.34,"200m":200/1609.34,"400m":400/1609.34,"800m":800/1609.34,"1600m":1600/1609.34,"3200m":3200/1609.34,"5k":5000/1609.34,"6k":6000/1609.34,"8k":8000/1609.34,"10k":10000/1609.34,"Half Marathon":13.1094,"Marathon":26.2188};
+      for (const label in standardDistances){
+        const splitTime = fmt((totalSeconds / distanceMiles) * standardDistances[label], useHundredths);
         html += `<p><span class="label">${label}:</span> ${splitTime}</p>`;
       }
-
       resultsBox.innerHTML = html;
     }
-
     document.getElementById("calcBtn").addEventListener("click", calculate);
+
+    // ===== Track Splits =====
+    const errorBoxSplits = document.getElementById('errorBoxSplits');
+    const splitsBox = document.getElementById('splitsBox');
+    const startDot = document.getElementById('startDot');
+    const lapInfo = document.getElementById('lapInfo');
+    const finishLine = document.getElementById('finishLine');
+
+    // Geometry from SVG rectangles
+    const cx = 300, cy = 150;
+    const rxOuter = 250, ryOuter = 125;
+    const rxInner = 230, ryInner = 105;
+    // Lane centerline (so dot & finish are BETWEEN borders)
+    const rxMid = (rxOuter + rxInner) / 2; // 240
+    const ryMid = (ryOuter + ryInner) / 2; // 115
+
+    // Finish tick angle: bottom-right
+    const FINISH_ANGLE = Math.PI / 4; // 45° (SVG y grows downward)
+
+    function positionFinishLineCenterband(){
+      // Short segment centered on lane centerline (same band as start dot)
+      const halfSpan = 8; // pixels of radial span around centerline
+      const r1x = rxMid - halfSpan, r1y = ryMid - halfSpan;
+      const r2x = rxMid + halfSpan, r2y = ryMid + halfSpan;
+      const x1 = cx + r1x * Math.cos(FINISH_ANGLE);
+      const y1 = cy + r1y * Math.sin(FINISH_ANGLE);
+      const x2 = cx + r2x * Math.cos(FINISH_ANGLE);
+      const y2 = cy + r2y * Math.sin(FINISH_ANGLE);
+      finishLine.setAttribute('x1', x1.toFixed(2));
+      finishLine.setAttribute('y1', y1.toFixed(2));
+      finishLine.setAttribute('x2', x2.toFixed(2));
+      finishLine.setAttribute('y2', y2.toFixed(2));
+    }
+    positionFinishLineCenterband();
+
+    function calcRaceSplits(){
+      clearError(errorBoxSplits); splitsBox.innerHTML = '';
+      const val = parseFloat(document.getElementById('raceDistanceValue').value);
+      const unit = document.getElementById('raceDistanceUnit').value;
+      const timeStr = document.getElementById('targetTime').value.trim();
+      const L = parseFloat(document.getElementById('trackLength').value); // meters
+      if (isNaN(val) || val<=0) return showError(errorBoxSplits, 'Enter a valid race distance.');
+      if (!timeStr) return showError(errorBoxSplits, 'Enter a target time.');
+      if (isNaN(L) || L<=0) return showError(errorBoxSplits, 'Enter a valid track length in meters.');
+      let Dm; // race distance in meters
+      if (unit==='meters') Dm = val; else if (unit==='kilometers') Dm = val*1000; else Dm = val*1609.34;
+
+      let T; try { T = parseTimeToSecondsStrict(timeStr); } catch(e){ return showError(errorBoxSplits, 'Time error: '+e.message); }
+      const pacePerMeter = T / Dm; // sec per meter
+
+      // Correct finish-crossing math: first odd, then every L; final equals D
+      let d1 = Dm % L; if (Math.abs(d1) < 1e-9) d1 = L;
+      const crossings = []; for (let d = d1; d <= Dm + 1e-9; d += L) crossings.push(d);
+
+      // Render
+      let html='';
+      crossings.forEach((meters,i)=>{
+        const t = pacePerMeter * meters;
+        const label = (Math.abs(meters - Dm) <= 1e-6) ? 'Finish' : `Pass ${i+1}`;
+        html += `<p><span class="label">${label}:</span> ${fmt(t, false)} <span style="color:#94a3b8">(${meters.toFixed(1)} m)</span></p>`;
+      });
+      splitsBox.innerHTML = html;
+
+      // Place start dot CLOCKWISE from finish by fracStart of a lap
+      const fracStart = (Math.abs(d1 - L) <= 1e-9) ? 0 : (1 - d1 / L);
+      const angle = FINISH_ANGLE - 2*Math.PI*fracStart; // clockwise
+      const sx = cx + rxMid * Math.cos(angle);
+      const sy = cy + ryMid * Math.sin(angle);
+      startDot.setAttribute('cx', sx.toFixed(2));
+      startDot.setAttribute('cy', sy.toFixed(2));
+
+      const laps = Dm / L;
+      lapInfo.textContent = `${laps.toFixed(3)} laps — start is ${(fracStart*100).toFixed(1)}% of a lap before the finish`;
+    }
+
+    document.getElementById('calcSplitsBtn').addEventListener('click', calcRaceSplits);
   </script>
 </body>
 </html>
